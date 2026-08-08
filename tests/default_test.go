@@ -3,11 +3,12 @@ package test
 import (
 	"net/http"
 	"net/http/httptest"
-	"testing"
-	"runtime"
 	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
 
-    "github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/core/logs"
 
 	_ "demo-project/routers"
 
@@ -17,12 +18,11 @@ import (
 
 func init() {
 	_, file, _, _ := runtime.Caller(0)
-	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".." + string(filepath.Separator))))
+	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
 	beego.TestBeegoInit(apppath)
 }
 
-
-// TestBeego is a sample to run an endpoint test
+// TestBeego verifies that the home page is available at the root URL.
 func TestBeego(t *testing.T) {
 	r, _ := http.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
@@ -31,12 +31,12 @@ func TestBeego(t *testing.T) {
 	logs.Trace("testing", "TestBeego", "Code[%d]\n%s", w.Code, w.Body.String())
 
 	Convey("Subject: Test Station Endpoint\n", t, func() {
-	        Convey("Status Code Should Be 200", func() {
-	                So(w.Code, ShouldEqual, 200)
-	        })
-	        Convey("The Result Should Not Be Empty", func() {
-	                So(w.Body.Len(), ShouldBeGreaterThan, 0)
-	        })
+		Convey("Status Code Should Be 200", func() {
+			So(w.Code, ShouldEqual, 200)
+		})
+		Convey("The Home Template Should Be Rendered", func() {
+			So(strings.Contains(w.Body.String(), "Build web experiences"), ShouldBeTrue)
+			So(strings.Contains(w.Body.String(), "Server is running"), ShouldBeTrue)
+		})
 	})
 }
-
